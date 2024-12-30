@@ -11,19 +11,20 @@ jobs:
     environment: production
 
     steps:
-      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up Google Cloud SDK
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: api-for-warp-drive
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
-      # Step 3: Deploy to VM
       - name: Deploy to VM
         env:
           PROJECT_ID: api-for-warp-drive
@@ -35,7 +36,6 @@ jobs:
         run: |
           echo "Starting deployment to VM: ${VM_NAME} in zone: ${ZONE}"
 
-          # SSH into the VM and execute commands
           gcloud compute ssh ${VM_NAME} \
             --zone=${ZONE} \
             --tunnel-through-iap \
@@ -50,16 +50,16 @@ jobs:
               sudo git clone ${REPO_URL};
               
               echo 'Setting up repository permissions...';
-              sudo chmod +x ${LOCAL_SCRIPT_DIR}/*.sh;
+              sudo chmod +x ${SCRIPT_DIR}/${LOCAL_SCRIPT_DIR}/*.sh;
               
               echo 'Running setup script...';
-              sudo ${LOCAL_SCRIPT_DIR}/setup.sh;
+              sudo ${SCRIPT_DIR}/${LOCAL_SCRIPT_DIR}/setup.sh;
               
               echo 'Installing npm dependencies...';
-              sudo -E npm install;
+              cd ${SCRIPT_DIR} && sudo -E npm install;
               
               echo 'Installing service scripts...';
-              sudo ${LOCAL_SCRIPT_DIR}/install-service.sh;
+              sudo ${SCRIPT_DIR}/${LOCAL_SCRIPT_DIR}/install-service.sh;
               
               echo 'Deployment steps completed successfully.';
             "
