@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: BackendConfig
+metadata:
+  name: backend-services-config
+spec:
+  services:
+  - name: gsmrsvd-rzpa7sugpfgdc5rx7tnx4r-1g2hoa49
+    network: default
+    region: us-west1
+    protocol: HTTP
+    backendType: networkEndpointGroup
+  # Repeat for all services
